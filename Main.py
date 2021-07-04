@@ -1,30 +1,30 @@
+import scene
 import ui
-#rups
 
-class Session(object):
-	def __init__(self):
+class Session(scene.Scene):
+	def setup(self):
 		self.player = 1
 		self.p1moves = []
 		self.p2moves = []
 		self.win = False
 		self.image = 'emj:Red_Ring'
 		print(self.player)
-		self.view = ui.View()
-		w, h = ui.get_screen_size()
-		print(w, h)
-		self.view.name = 'Rups Tic Tac Toe'  # [2]
-		self.view.background_color = 'white'  # [3]
-		
+		w,h = self.size
+		print(w)
+		print(h)
+		mw = 46
+		mh = 37
+		gap = 100
 		create_b = {
-		'1': [3, 3],
-		'2': [5, 3],
-		'3': [7, 3],
-		'4': [3, 5],
-		'5': [5, 5],
-		'6': [7, 5],
-		'7': [3, 7],
-		'8': [5, 7],
-		'9': [7, 7]
+		'1': [410, 280],
+		'2': [510, 280],
+		'3': [610, 280],
+		'4': [410, 380],
+		'5': [510, 380],
+		'6': [610, 380],
+		'7': [410, 480],
+		'8': [510, 480],
+		'9': [610, 480]
 		}
 		for k, v in create_b.items():
 			a = 'button' + k
@@ -36,7 +36,10 @@ class Session(object):
 			a.action = self.button_tapped
 			a.background_image = ui.Image.named('card:BackBlue1')
 			self.view.add_subview(a)
-		self.view.present()
+			s = scene.get_screen_size()
+			print(s)
+			print(self.size /2  )
+			
 		
 	def button_create():
 		print('testing')
@@ -49,7 +52,16 @@ class Session(object):
 			self.switch_player()
 		else:
 			sender.title = 'WINNER'
-			
+			w,h = self.size
+			winnertext = scene.LabelNode('Winner!!!!',font=('Helvetica', 100))
+			winnertext.position = self.size / 2
+			self.add_child(winnertext)
+			reset = ui.Button(name='reset')
+			reset.frame = (10, 10, 90, 90)
+			reset.flex = 'LRTB'
+			reset.border_width = 1
+			reset.corner_radius = 6
+			self.view.add_subview(reset)
 	def sel_square(self, sender):
 		sender.background_image = ui.Image.named(self.image)
 		if self.player == 1:
@@ -83,5 +95,5 @@ class Session(object):
 				
 				
 				
-v = Session()
+scene.run(Session())
 
