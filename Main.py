@@ -1,31 +1,27 @@
 import scene
 import ui
+import time
 
 create_b = {
-		'1': [410, 280],
-		'2': [510, 280],
-		'3': [610, 280],
-		'4': [410, 380],
-		'5': [510, 380],
-		'6': [610, 380],
-		'7': [410, 480],
-		'8': [510, 480],
-		'9': [610, 480]
+		'1': [280, 280, 410],
+		'2': [280, 280, 510],
+		'3': [280, 280, 610],
+		'4': [280, 380, 410],
+		'5': [280, 380, 510],
+		'6': [280, 380, 610],
+		'7': [280, 480, 410],
+		'8': [280, 480, 510],
+		'9': [280, 480, 610]
 		}
 class Session(scene.Scene):
 	def setup(self):
+		self.background_color = '5300c0'
 		self.player = 1
 		self.p1moves = []
 		self.p2moves = []
 		self.win = False
 		self.image = 'emj:Red_Ring'
 		print(self.player)
-		w,h = self.size
-		print(w)
-		print(h)
-		mw = 46
-		mh = 37
-		gap = 100
 		self.make_board()
 	
 	def make_board(self):
@@ -33,7 +29,10 @@ class Session(scene.Scene):
 			main_b = self.make_button(k, v[0], v[1], 'card:BackBlue1')
 			main_b.action = self.button_tapped_game
 			main_b.background_color = 'white'
-			self.view.add_subview(main_b)
+			def anim_board():
+				self.view.add_subview(main_b)
+				main_b.x = v[2]		
+			ui.animate(anim_board, duration =1, delay =1)
 			
 			
 	def make_button(self, bname, bh, bw, bimage):
@@ -46,31 +45,76 @@ class Session(scene.Scene):
 		a.background_image = ui.Image.named(bimage)
 		return a
 		
-	def button_create():
-		print('testing')
-		
+	
 	def button_tapped_game(self, sender):
-		print('im here')
 		self.sel_square(sender)
 		sender.enabled = False
 		win = self.check_winner()
 		if not self.win:
 			self.switch_player()
 		else:
-			z = sender.superview
-			for v in sender.superview.subviews:
-				print (v.name)
-			print(win)
-			for i in win:
-				z[str(i)].background_color= 'yellow'
-			w,h = self.size
+			self.add_restart_button()
+			
+			superv = self.get_butt_superview(sender)
+			self.disable_buttons(superv)
+			self.anim_win(win, superv)
+			
+	def add_restart_button(self):
 			restart_b = self.make_button('restart', 10, 10,'typb:Back' )
 			restart_b.background_color = 'white'
-			self.view.add_subview(restart_b)
 			restart_b.action = self.restart_game
+			self.view.add_subview(restart_b)
 			
+	def get_butt_superview(self, sender):
+		return sender.superview
+	
+	def disable_buttons(self, superv):	
+		for v in superv.subviews:
+			i = 1
+			while i < 10:
+				superv[str(i)].enabled = False
+				i = i+1
+		 
+						
+	def anim_win(self, winner, button):
+		win = winner
+		z = button																
+		def small():
+			for i in win:
+				z[str(i)].transform = ui.Transform.scale(.95, .95)
+
+				
+		def norm():
+			for i in win:
+				z[str(i)].transform = ui.Transform.scale(1, 1)
+				
+		def anim_norm():
+			ui.animate(norm ,duration=.3)		
+				
+		def anim_small():
+			ui.animate(small,duration=.3,completion=anim_norm)
+		
+		def anim_big():
+			for i in win:
+				z[str(i)].background_color= 'yellow'
+				z[str(i)].transform = ui.Transform.scale(1.05, 1.05)
+			
+		ui.animate(anim_big, duration=.3, completion=anim_small)
+
 	def restart_game(self,sender):
+		z = sender.superview
+		for v in sender.superview.subviews:
+			i = 1
+			while i < 10:
+				z[str(i)].alpha = 0.0
+				z[str(i)].background_image = ui.Image.named('card:BackBlue1')
+				z[str(i)].enabled = True
+				z[str(i)].background_color= 'white'
+				z[str(i)].alpha = 1
+				i = i+1
+			
 		self.player = 1
+		self.image = 'emj:Red_Ring'
 		self.win = False
 		self.p1moves = []
 		self.p2moves = []
@@ -79,6 +123,8 @@ class Session(scene.Scene):
 	
 	def sel_square(self, sender):
 		print(sender.name)
+		print(sender)
+		
 		sender.background_image = ui.Image.named(self.image)
 		
 		if self.player == 1:
